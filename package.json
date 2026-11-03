@@ -1,0 +1,22 @@
+{
+  "name": "ai-campus-event-orchestrator",
+  "version": "1.0.0",
+  "description": "Autonomous Campus Event Orchestrator powered by Multi-Agent AI Architecture",
+  "scripts": {
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "seed": "npm --prefix backend run seed",
+    "build:frontend": "npm --prefix frontend run build"
+  },
+  "keywords": [
+    "multi-agent",
+    "ai",
+    "orchestrator",
+    "campus-events",
+    "react",
+    "nodejs",
+    "mongodb"
+  ],
+  "author": "Google DeepMind / Antigravity",
+  "license": "MIT"
+}
