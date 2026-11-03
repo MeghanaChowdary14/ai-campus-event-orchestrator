@@ -6,12 +6,12 @@ const connectDB = async () => {
   const uri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/ai_campus_events';
 
   try {
-    // Attempt standard connection first with 10s timeout
-    console.log(`[Database] Connecting to MongoDB...`);
+    // Attempt standard connection first with 20s timeout (Vercel serverless needs more time)
+    console.log(`[Database] Connecting to MongoDB... URI starts with: ${uri.substring(0, 30)}...`);
     const conn = await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 10000,
+      serverSelectionTimeoutMS: 20000,
     });
-    console.log(`[Database] MongoDB Connected: ${conn.connection.host}:${conn.connection.port}`);
+    console.log(`[Database] MongoDB Connected: ${conn.connection.host}`);
     return conn;
   } catch (err) {
     console.warn(`[Database] Standard MongoDB connection failed (${err.message}).`);

@@ -60,6 +60,10 @@ const ensureDB = () => {
       } else {
         console.log(`[Server] Found ${userCount} existing users in database.`);
       }
+    }).catch((err) => {
+      console.error('[Server] DB connection failed, will retry next request:', err.message);
+      dbReady = null; // Reset so next request retries
+      throw err;
     });
   }
   return dbReady;
