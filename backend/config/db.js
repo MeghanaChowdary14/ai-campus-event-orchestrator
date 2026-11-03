@@ -16,10 +16,10 @@ const connectDB = async () => {
   } catch (err) {
     console.warn(`[Database] Standard MongoDB connection failed (${err.message}).`);
 
-    // In production, never fall back to in-memory — fail loudly
+    // In production, never fall back to in-memory — throw error instead
     if (process.env.NODE_ENV === 'production') {
-      console.error('[Database] Production requires a valid MONGO_URI. Exiting.');
-      process.exit(1);
+      console.error('[Database] Production requires a valid MONGO_URI.');
+      throw new Error('Production MongoDB connection failed: ' + err.message);
     }
 
     console.log('[Database] Falling back to Embedded MongoMemoryServer (dev only)...');
