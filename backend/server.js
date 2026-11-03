@@ -46,7 +46,37 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Mount Routes
+const PORT = process.env.PORT || 5000;
+
+// Database connection promise (cached for serverless)
+let dbReady = null;
+const ensureDB = () => {
+  if (!dbReady) {
+    dbReady = connectDB().then(async () => {
+      const userCount = await User.countDocuments();
+      if (userCount === 0) {
+        console.log('[Server] Database is empty. Running automatic initial seeder...');
+        await seedAll();
+      } else {
+        console.log(`[Server] Found ${userCount} existing users in database.`);
+      }
+    });
+  }
+  return dbReady;
+};
+
+// Middleware to ensure DB is connected before handling requests
+app.use(async (req, res, next) => {
+  try {
+    await ensureDB();
+    next();
+  } catch (err) {
+    console.error('[Server] DB connection error:', err);
+    res.status(500).json({ message: 'Database connection failed' });
+  }
+});
+
+// Re-mount routes AFTER the DB middleware
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/tasks', taskRoutes);
@@ -54,37 +84,27 @@ app.use('/api/venues', venueRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/analytics', analyticsRoutes);
-
-// Central Error Handler
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
-
-// Connect to DB and start server
-const startServer = async () => {
-  try {
-    await connectDB();
-
-    // Auto-seed if database has no users
-    const userCount = await User.countDocuments();
-    if (userCount === 0) {
-      console.log('[Server] Database is empty. Running automatic initial seeder...');
-      await seedAll();
-    } else {
-      console.log(`[Server] Found ${userCount} existing users in database.`);
+// For local development: start server with app.listen
+if (process.env.NODE_ENV !== 'production') {
+  const startServer = async () => {
+    try {
+      await ensureDB();
+      app.listen(PORT, () => {
+        console.log(`\n========================================================`);
+        console.log(`🚀 AI Campus Event Orchestrator Backend Running!`);
+        console.log(`📡 URL: http://localhost:${PORT}`);
+        console.log(`🤖 Multi-Agent AI Architecture Active`);
+        console.log(`========================================================\n`);
+      });
+    } catch (err) {
+      console.error('[Server] Critical startup error:', err);
+      process.exit(1);
     }
+  };
+  startServer();
+}
 
-    app.listen(PORT, () => {
-      console.log(`\n========================================================`);
-      console.log(`🚀 AI Campus Event Orchestrator Backend Running!`);
-      console.log(`📡 URL: http://localhost:${PORT}`);
-      console.log(`🤖 Multi-Agent AI Architecture Active`);
-      console.log(`========================================================\n`);
-    });
-  } catch (err) {
-    console.error('[Server] Critical startup error:', err);
-    process.exit(1);
-  }
-};
-
-startServer();
+// For Vercel serverless: export the Express app
+module.exports = app;
