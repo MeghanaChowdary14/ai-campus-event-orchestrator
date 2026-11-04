@@ -24,8 +24,17 @@ const seedAll = async () => {
     await Task.deleteMany({});
     await Notification.deleteMany({});
 
-    console.log('[Seeder] Creating 5 standard role users...');
+    console.log('[Seeder] Creating admin and standard role users...');
     const users = await User.create([
+      {
+        name: 'System Administrator',
+        email: 'admin@campus.edu',
+        password: 'Admin@12345',
+        role: 'Admin',
+        department: 'Campus Administration',
+        phone: '+1 (555) 012-0001',
+        isApproved: true,
+      },
       {
         name: 'Dr. Sarah Jenkins',
         email: 'coordinator@campus.edu',
@@ -33,6 +42,7 @@ const seedAll = async () => {
         role: 'Coordinator',
         department: 'Student Affairs & Campus Life',
         phone: '+1 (555) 012-4001',
+        isApproved: true,
       },
       {
         name: 'Marcus Vance',
@@ -41,6 +51,7 @@ const seedAll = async () => {
         role: 'Venue Team',
         department: 'Campus Facilities & Operations',
         phone: '+1 (555) 012-4002',
+        isApproved: true,
       },
       {
         name: 'Elena Rostova',
@@ -49,6 +60,7 @@ const seedAll = async () => {
         role: 'Technical Team',
         department: 'Information Technology Services',
         phone: '+1 (555) 012-4003',
+        isApproved: true,
       },
       {
         name: 'Aiden Patel',
@@ -57,6 +69,7 @@ const seedAll = async () => {
         role: 'Volunteer Team',
         department: 'Student Council Leadership',
         phone: '+1 (555) 012-4004',
+        isApproved: true,
       },
       {
         name: 'Chief Robert Stone',
@@ -65,14 +78,16 @@ const seedAll = async () => {
         role: 'Security Team',
         department: 'Campus Safety & Protection',
         phone: '+1 (555) 012-4005',
+        isApproved: true,
       },
     ]);
 
-    const coordinatorUser = users[0];
-    const venueUser = users[1];
-    const techUser = users[2];
-    const volunteerUser = users[3];
-    const securityUser = users[4];
+    const adminUser = users[0];
+    const coordinatorUser = users[1];
+    const venueUser = users[2];
+    const techUser = users[3];
+    const volunteerUser = users[4];
+    const securityUser = users[5];
 
     console.log('[Seeder] Creating campus venues...');
     const venues = await Venue.create([
@@ -511,7 +526,8 @@ const seedAll = async () => {
 
     console.log('[Seeder] Database seeding completed successfully!');
     console.log('----------------------------------------------------');
-    console.log('Default Seeded Accounts:');
+    console.log('Default Accounts:');
+    console.log('Admin:          admin@campus.edu        / Admin@12345');
     console.log('Coordinator:    coordinator@campus.edu  / Admin@123');
     console.log('Venue Team:     venue@campus.edu        / Venue@123');
     console.log('Technical Team: tech@campus.edu         / Tech@123');

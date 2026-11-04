@@ -35,7 +35,7 @@ import {
 } from 'recharts';
 
 const Dashboard = () => {
-  const { user, role } = useAuth();
+  const { user, role, isAdmin } = useAuth();
   const [data, setData] = useState(null);
   const [roleTasks, setRoleTasks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -118,6 +118,17 @@ const Dashboard = () => {
               : `You are viewing the dedicated ${role} dashboard. Track assigned responsibilities, update task statuses, and verify facility readiness.`}
           </p>
         </div>
+
+        {isAdmin && (
+          <div className="relative z-10 shrink-0 flex items-center gap-3">
+            <Link
+              to="/admin/approvals"
+              className="px-5 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-lg shadow-purple-600/30 flex items-center gap-2 transition"
+            >
+              <ShieldCheck className="w-4 h-4" /> Member Approvals
+            </Link>
+          </div>
+        )}
 
         {isCoordinator && (
           <div className="relative z-10 shrink-0 flex items-center gap-3">

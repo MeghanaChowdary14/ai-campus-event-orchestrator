@@ -49,9 +49,8 @@ const registerUser = async (req, res) => {
       role: assignedRole,
       department: department || 'Campus Operations',
       phone: phone || '',
+      isApproved: false, // Requires admin approval
     });
-
-    const token = generateToken(user._id);
 
     res.status(201).json({
       success: true,
@@ -61,8 +60,9 @@ const registerUser = async (req, res) => {
         email: user.email,
         role: user.role,
         department: user.department,
-        token,
+        isApproved: false,
       },
+      message: 'Registration submitted successfully! Your account is pending administrator verification and approval before you can sign in.',
     });
   } catch (err) {
     console.error('[Auth Controller] Register error:', err);
@@ -104,6 +104,15 @@ const loginUser = async (req, res) => {
       });
     }
 
+    // Check admin approval
+    if (!user.isApproved && user.role !== 'Admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Your registration is currently pending administrator verification. Please wait for an Admin to review and approve your account.',
+        pendingApproval: true,
+      });
+    }
+
     const token = generateToken(user._id);
 
     res.json({
@@ -115,6 +124,7 @@ const loginUser = async (req, res) => {
         role: user.role,
         department: user.department,
         phone: user.phone,
+        isApproved: user.isApproved,
         token,
       },
     });
@@ -150,12 +160,86 @@ const getMe = async (req, res) => {
 // @access  Private
 const getUsers = async (req, res) => {
   try {
-    const { role } = req.query;
-    const filter = role ? { role } : {};
-    const users = await User.find(filter).select('-password');
+    const { role, status } = req.query;
+    const filter = {};
+    if (role) filter.role = role;
+    if (status === 'pending') filter.isApproved = false;
+    if (status === 'approved') filter.isApproved = true;
+
+    const users = await User.find(filter).select('-password').sort({ createdAt: -1 });
     res.json({
       success: true,
       data: users,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+// @desc    Approve or reject a user registration
+// @route   PUT /api/auth/users/:id/approve
+// @access  Private (Admin only)
+const approveUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    user.isApproved = true;
+    user.approvedAt = new Date();
+    user.approvedBy = req.user._id;
+
+    if (req.body.role) {
+      user.role = req.body.role;
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: `User ${user.name} approved successfully as ${user.role}.`,
+      data: user,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+// @desc    Reject / delete a user registration
+// @route   DELETE /api/auth/users/:id
+// @access  Private (Admin only)
+const deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    if (user.role === 'Admin') {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete an Admin account.',
+      });
+    }
+
+    await User.findByIdAndDelete(req.params.id);
+
+    res.json({
+      success: true,
+      message: `Registration for ${user.name} was rejected and removed.`,
     });
   } catch (err) {
     res.status(500).json({
@@ -170,4 +254,6 @@ module.exports = {
   loginUser,
   getMe,
   getUsers,
+  approveUser,
+  deleteUser,
 };

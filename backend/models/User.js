@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: [
+        'Admin',
         'Coordinator',
         'Venue Team',
         'Technical Team',
@@ -32,6 +33,19 @@ const userSchema = new mongoose.Schema(
         'Security Team',
       ],
       default: 'Coordinator',
+    },
+    isApproved: {
+      type: Boolean,
+      default: false,
+    },
+    approvedAt: {
+      type: Date,
+      default: null,
+    },
+    approvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
     },
     department: {
       type: String,

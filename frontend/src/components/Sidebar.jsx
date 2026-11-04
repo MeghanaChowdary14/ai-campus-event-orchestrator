@@ -11,14 +11,18 @@ import {
   Bell,
   Cpu,
   ShieldCheck,
+  UserCheck,
 } from 'lucide-react';
 
 const Sidebar = () => {
-  const { role } = useAuth();
+  const { role, isAdmin } = useAuth();
   const isCoordinator = role === 'Coordinator';
 
   const navLinks = [
     { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+    ...(isAdmin
+      ? [{ to: '/admin/approvals', label: 'Member Approvals', icon: UserCheck, highlight: true }]
+      : []),
     { to: '/events', label: 'Campus Events', icon: CalendarDays },
     ...(isCoordinator
       ? [{ to: '/events/create', label: 'Plan New Event', icon: PlusCircle, highlight: true }]

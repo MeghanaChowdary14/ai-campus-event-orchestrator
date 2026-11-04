@@ -1,8 +1,7 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import NotificationDropdown from './NotificationDropdown';
-import QuickRoleSwitcher from './QuickRoleSwitcher';
-import { LogOut, Bot, Sparkles, User as UserIcon } from 'lucide-react';
+import { LogOut, Bot, Sparkles, User as UserIcon, Shield } from 'lucide-react';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -31,8 +30,12 @@ const Navbar = () => {
 
       {/* Right Controls */}
       <div className="flex items-center gap-2 sm:gap-4">
-        {/* Quick Role Switcher */}
-        <QuickRoleSwitcher />
+        {/* User Role Badge */}
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs">
+          <Shield className="w-3.5 h-3.5 text-indigo-500" />
+          <span className="text-slate-500 dark:text-slate-400 hidden sm:inline">Role:</span>
+          <span className="font-bold text-indigo-600 dark:text-indigo-400">{user?.role}</span>
+        </div>
 
         {/* Notifications */}
         <NotificationDropdown />

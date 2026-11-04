@@ -43,9 +43,29 @@ export const api = {
     return handleResponse(res);
   },
 
-  getUsers: async (role) => {
-    const query = role ? `?role=${encodeURIComponent(role)}` : '';
+  getUsers: async (role, status) => {
+    const params = new URLSearchParams();
+    if (role) params.append('role', role);
+    if (status) params.append('status', status);
+    const query = params.toString() ? `?${params.toString()}` : '';
     const res = await fetch(`${API_BASE}/auth/users${query}`, {
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  approveUser: async (id, roleUpdate) => {
+    const res = await fetch(`${API_BASE}/auth/users/${id}/approve`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(roleUpdate || {}),
+    });
+    return handleResponse(res);
+  },
+
+  deleteUser: async (id) => {
+    const res = await fetch(`${API_BASE}/auth/users/${id}`, {
+      method: 'DELETE',
       headers: getAuthHeaders(),
     });
     return handleResponse(res);

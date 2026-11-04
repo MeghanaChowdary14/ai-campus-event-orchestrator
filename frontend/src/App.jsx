@@ -17,6 +17,7 @@ import TaskManagement from './pages/TaskManagement';
 import VenueManagement from './pages/VenueManagement';
 import ResourceInventory from './pages/ResourceInventory';
 import NotificationsPage from './pages/NotificationsPage';
+import AdminDashboard from './pages/AdminDashboard';
 
 const AppLayout = ({ children }) => {
   return (
@@ -49,6 +50,17 @@ function App() {
                 <ProtectedRoute>
                   <AppLayout>
                     <Dashboard />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/approvals"
+              element={
+                <ProtectedRoute allowedRoles={['Admin']}>
+                  <AppLayout>
+                    <AdminDashboard />
                   </AppLayout>
                 </ProtectedRoute>
               }
