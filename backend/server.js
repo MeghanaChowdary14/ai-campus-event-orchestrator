@@ -59,6 +59,31 @@ const ensureDB = () => {
         await seedAll();
       } else {
         console.log(`[Server] Found ${userCount} existing users in database.`);
+        // Ensure master admin account exists and is approved
+        let adminUser = await User.findOne({ email: 'admin@campus.edu' });
+        if (!adminUser) {
+          console.log('[Server] Initializing master Administrator account...');
+          await User.create({
+            name: 'System Administrator',
+            email: 'admin@campus.edu',
+            password: 'Admin@12345',
+            role: 'Admin',
+            department: 'Campus Administration',
+            phone: '+1 (555) 012-0001',
+            isApproved: true,
+          });
+          console.log('[Server] Master Administrator account created successfully.');
+        } else {
+          adminUser.isApproved = true;
+          adminUser.role = 'Admin';
+          await adminUser.save();
+        }
+
+        // Also ensure default seeded team roles are approved
+        await User.updateMany(
+          { email: { $in: ['coordinator@campus.edu', 'venue@campus.edu', 'tech@campus.edu', 'volunteer@campus.edu', 'security@campus.edu'] } },
+          { $set: { isApproved: true } }
+        );
       }
     }).catch((err) => {
       console.error('[Server] DB connection failed, will retry next request:', err.message);
